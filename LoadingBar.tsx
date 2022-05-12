@@ -1,13 +1,15 @@
 import {
   Rect,
+  runTiming,
   Shader,
   Skia,
-  useCanvasSize,
+  useCanvas,
   useClockValue,
   useDerivedValue,
-  useTiming,
+  useValue,
+  useValueEffect,
 } from '@shopify/react-native-skia';
-import React, { FC, useEffect } from 'react';
+import React, { FC } from 'react';
 
 const source = Skia.RuntimeEffect.Make(`
 uniform float iTime;
@@ -21,32 +23,25 @@ if (!source) {
 }
 
 export const LoadingBar: FC = () => {
-  const canvasSize = useCanvasSize().current;
-  const width = canvasSize.width;
-  const height = canvasSize.height;
+  const { size } = useCanvas();
   const clock = useClockValue();
   const uniforms = useDerivedValue(() => ({ iTime: clock.current }), [clock]);
-  const value = useTiming(
-    { to: width, loop: true, from: 0 },
-    {
-      duration: 10000,
-    },
-  );
+  const value = useValue(0);
 
-  // Somehow it is necessary to rerender once to start the useTiming animation
-  // Note this also breaks on fast refresh
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [rerender, setRerender] = React.useState(0);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setRerender(r => r + 1);
-    }, 100);
-  }, []);
+  // The canvas has width === 0 in the first render, so we need to start the animation after the value is set
+  useValueEffect(size, () => {
+    runTiming(
+      value,
+      { from: 0, to: size.current.width, loop: true },
+      {
+        duration: 10000,
+      },
+    );
+  });
 
   return (
     <>
-      <Rect x={0} y={0} width={value} height={height}>
+      <Rect x={0} y={0} width={value} height={50}>
         <Shader source={source} uniforms={uniforms} />
       </Rect>
     </>

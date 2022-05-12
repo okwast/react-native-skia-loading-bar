@@ -10,9 +10,10 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
-    "@shopify/react-native-skia": "^0.1.123",
+    "@shopify/react-native-skia": "^0.1.124",
     "react": "17.0.2",
-    "react-native": "0.68.1"
+    "react-native": "0.68.1",
+    "react-native-reanimated": "^2.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9",
